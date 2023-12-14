@@ -1,0 +1,6 @@
+[submodule "framework5"]
+	path = framework5
+	url = https://github.com/totaljs/framework5
+[submodule "total5"]
+	path = total5
+	url = https://github.com/totaljs/framework5
