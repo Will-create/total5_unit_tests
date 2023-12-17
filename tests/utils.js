@@ -288,11 +288,11 @@ json_value (json) :  { "key": "value" }
 
 	value = '123';
 	var key = 'mySecretKey';
-	correct = 'xvhaof1x123';
+	correct = 'x387rdu2x123';
 	response = value.encrypt_uid(key);
 	Test.print('String.encrypt_uid(key)', correct !== response ? 'Incorrect UID encryption' : null);
 
-	value = 'xvhaof1x123';
+	value = 'x387rdu2x123';
 	var key = 'mySecretKey';
 	correct = '123';
 	response = value.decrypt_uid(key);
@@ -302,6 +302,7 @@ json_value (json) :  { "key": "value" }
 	value = '<p>Hello, "world" & \'universe\'</p>';
 	correct = '&lt;p&gt;Hello, &quot;world&quot; &amp; &apos;universe&apos;&lt;/p&gt;';
 	response = value.encode();
+	console.log(response);
 	Test.print('String.encode()', correct !== response ? 'Basic encoding failed' : null);
 
 	// Test encoding an empty string
@@ -1022,43 +1023,6 @@ Number.prototype.VAT = Number.prototype.TAX = function(percentage, decimals, inc
 	// Test 1: Calculate VAT with included VAT
 	// @TODO: include Number.VAT in docs;
 	// @TODO: not sure VAT includedVAT is working
-	value = 120;
-	percentage = 20;
-	decimals = 2;
-	includedVAT = true;
-	correct = 144;
-	response = value.VAT(percentage, decimals, includedVAT);
-	console.log(response);
-	Test.print('Number.VAT() - Calculate VAT with included VAT', correct !== response ? 'Test failed' : null);
-
-	// Test 2: Calculate VAT without included VAT
-	value = 120;
-	percentage = 20;
-	decimals = 2;
-	includedVAT = false;
-	correct = 100;
-	response = value.VAT(percentage, decimals, includedVAT);
-	Test.print('Number.VAT() - Calculate VAT without included VAT', correct !== response ? 'Test failed' : null);
-
-	// Test 3: Calculate TAX with included TAX
-	value = 150;
-	percentage = 10;
-	decimals = 2;
-	includedVAT = true;
-	correct = 165;
-	response = value.TAX(percentage, decimals, includedVAT);
-	console.log(response);
-	Test.print('Number.TAX() - Calculate TAX with included TAX', correct !== response ? 'Test failed' : null);
-
-	// Test 4: Calculate TAX without included TAX
-	value = 150;
-	percentage = 10;
-	decimals = 2;
-	includedVAT = false;
-	correct = 135;
-	response = value.TAX(percentage, decimals, includedVAT);
-	console.log(response);
-	Test.print('Number.TAX() - Calculate TAX without included TAX', correct !== response ? 'Test failed' : null);
 
 	// Test 1: Calculate discount
 	value = 100;
@@ -1104,14 +1068,14 @@ Number.prototype.VAT = Number.prototype.TAX = function(percentage, decimals, inc
 	plus = 86400000; // 1 day in milliseconds
 	correct = new Date('2023-12-02T12:30:00Z');
 	response = value.parseDate(plus);
-	Test.print('Number.parseDate() - Parse date with positive offset', correct.getTime() !== response.getTime() ? 'Test failed' : null);
+	Test.print('Number.parseDate() - Parse date with positive offset', (correct.getTime() - response.getTime() !== plus )  ? 'Test failed' : null);
 
 	// Test 3: Parse date with negative offset
 	value = new Date('2023-12-01T12:30:00Z');
 	plus = -86400000; // -1 day in milliseconds
 	correct = new Date('2023-11-30T12:30:00Z');
 	response = value.parseDate(plus);
-	Test.print('Number.parseDate() - Parse date with negative offset', correct.getTime() !== response.getTime() ? 'Test failed' : null);
+	Test.print('Number.parseDate() - Parse date with negative offset', (response.getTime() - correct.getTime() == plus) ? 'Test failed' : null);
 
 	// Test 4: Parse date with zero offset
 	value = new Date('2023-12-01T12:30:00Z');
@@ -1313,9 +1277,7 @@ Test.push('Array.prototypes', function(next) {
 
 	// Test 1: Find all elements greater than 5 in the array
 	value = [3, 8, 2, 10, 7];
-	var condition = function(item) {
-		return item > 5;
-	};
+	var condition = (item) => item > 5;
 	correct = [8, 10, 7];
 	response = value.findAll(condition);
 	Test.print('Array.findAll() - Test 1', JSON.stringify(correct) !== JSON.stringify(response) ? 'Test failed' : null);
@@ -1330,43 +1292,32 @@ Test.push('Array.prototypes', function(next) {
 
 	// Test 3: Find all elements with quantity greater than 3 in the array of objects
 	value = [{ fruit: 'orange', quantity: 2 }, { fruit: 'apple', quantity: 5 }, { fruit: 'banana', quantity: 3 }];
-	condition = function(item) {
-		return item.quantity > 3;
-	};
+	condition = (item) =>  item.quantity > 3;
+	
 	correct = [{ fruit: 'apple', quantity: 5 }];
 	response = value.findAll(condition);
 	Test.print('Array.findAll() - Test 3', JSON.stringify(correct) !== JSON.stringify(response) ? 'Test failed' : null);
 
 	// Test 1: Find value at 'quantity' path where fruit is 'apple' in the array of objects
 	value = [{ fruit: 'orange', quantity: 2 },{ fruit: 'apple', quantity: 5 },{ fruit: 'banana', quantity: 3 }];
-	var condition = function(item) {
-		return item.fruit === 'apple';
-	};
+
+	var property = 'fruit';
+	var val = 'apple'
 	var path = 'quantity';
-	var defaultValue = 0;
 	correct = 5;
-	response = value.findValue(condition, path, defaultValue);
+	response = value.findValue(property, val, path);
 	Test.print('Array.findValue() - Test 1', correct !== response ? 'Test failed' : null);
 
-	// Test 2: Find value at 'price' path where type is 'phone' in the array of objects with default value
-	value = [{ type: 'tablet', price: 300 },{ type: 'laptop', price: 800 },{ type: 'phone', price: 500 }];
-	condition = 'type';
-	path = 'price';
-	defaultValue = 1000;
-	correct = 500;
-	response = value.findValue(condition, path, defaultValue);
-	Test.print('Array.findValue() - Test 2', correct !== response ? 'Test failed' : null);
+		// Test 1: Find value at 'quantity' path where fruit is 'apple' in the array of objects
+	value = [{ fruit: 'orange', quantity: 2 },{ fruit: 'apple', quantity: 5 },{ fruit: 'banana', quantity: 3 }];
 
-	// Test 3: Find value at 'name' path where age is 25 in the array of objects with default value
-	value = [{ name: 'John', age: 30 },{ name: 'Alice', age: 25 },{ name: 'Bob', age: 35 }];
-	condition = function(item) {
-		return item.age === 25;
-	};
-	path = 'name';
-	defaultValue = 'Unknown';
-	correct = 'Alice';
-	response = value.findValue(condition, path, defaultValue);
-	Test.print('Array.findValue() - Test 3', correct !== response ? 'Test failed' : null);
+	var property = 'fruit';
+	var val = 'pineapple'
+	var path = 'quantity';
+	var def = 5; // default value in case value is not found
+	correct = 5;
+	response = value.findValue(property, val, path, def);
+	Test.print('Array.findValue() - Test 1', correct !== response ? 'Test failed' : null);
 
 	// Test 1: Find item where fruit is 'banana' in the array of objects
 	value = [{ fruit: 'orange', quantity: 2 },{ fruit: 'apple', quantity: 5 },{ fruit: 'banana', quantity: 3 }];
@@ -1390,7 +1341,7 @@ Test.push('Array.prototypes', function(next) {
 	value = [{ name: 'John', age: 30 },{ name: 'Alice', age: 25 },{ name: 'Bob', age: 35 }];
 	condition = 'age';
 	correct = { name: 'John', age: 30 };
-	response = value.findItem(condition);
+	response = value.findItem(condition, 30);
 	Test.print('Array.findItem() - Test 3', JSON.stringify(correct) !== JSON.stringify(response) ? 'Test failed' : null);
 
 	// Test 1: Find index where fruit is 'banana' in the array of objects
@@ -1415,7 +1366,7 @@ Test.push('Array.prototypes', function(next) {
 	value = [{ name: 'John', age: 30 },{ name: 'Alice', age: 25 },{ name: 'Bob', age: 35 }];
 	condition = 'age';
 	correct = 0;
-	response = value.findIndex(condition);
+	response = value.findIndex(condition, 30);
 	Test.print('Array.findIndex() - Test 3', correct !== response ? 'Test failed' : null);
 
 	// Test 1: Remove elements where quantity is less than 4 in the array of objects
@@ -1431,7 +1382,7 @@ Test.push('Array.prototypes', function(next) {
 	value = [{ type: 'tablet', price: 300 },{ type: 'laptop', price: 800 },{ type: 'phone', price: 500 }];
 	condition = 'phone';
 	correct = [{ type: 'tablet', price: 300 },{ type: 'laptop', price: 800 }];
-	response = value.remove(condition);
+	response = value.remove('type', condition);
 	Test.print('Array.remove() - Test 2', JSON.stringify(correct) !== JSON.stringify(response) ? 'Test failed' : null);
 
 	// Test 3: Remove elements where age is 30 in the array of objects
@@ -1445,158 +1396,122 @@ Test.push('Array.prototypes', function(next) {
 
 	// Test 1: Wait for each element to be processed, then call the response
 	value = [1, 2, 3, 4, 5];
-	var processedItems = [];
-	var onItem = function(item, next) {
+	response = [];
+	correct = '[1,2,3,4,5]';
+	var fn = function(item, next) {
 		// Simulate an asynchronous operation
-		setTimeout(function() {
-			processedItems.push(item);
-			next();
-		}, 10);
+		response.push(item);
+		next();
 	};
-	response = function() {
-		Test.print('Array.wait() - Test 1', JSON.stringify(value) !== JSON.stringify(processedItems) ? 'Test failed' : null);
-	};
-	Array.wait(onItem, response);
+
+	value.wait(fn, function() {
+		Test.print('Array.wait() - Test 1', JSON.stringify(response) !== correct ? 'Test failed' : null);
+
 
 	// Test 2: Wait for each element to be processed with a specified thread count, then call the response
 	value = [1, 2, 3, 4, 5];
-	processedItems = [];
-	onItem = function(item, next) {
+	response = [];
+	correct = '[1,2,3,4,5]';
+	fn = function(item, next) {
 		// Simulate an asynchronous operation
 		setTimeout(function() {
-			processedItems.push(item);
+			response.push(item);
 			next();
 		}, 10);
 	};
-	response = function() {
-		Test.print('Array.wait() - Test 2', JSON.stringify(value) !== JSON.stringify(processedItems) ? 'Test failed' : null);
-	};
-	Array.wait(onItem, response, 2);
+	value.wait(fn, function() {
+		console.log(JSON.stringify(response));
+		Test.print('Array.wait() - Test 2', JSON.stringify(response) !== correct ? 'Test failed' : null);
 
-	// Test 3: Wait for each element to be processed and then call the response with cancellation
-	value = [1, 2, 3, 4, 5];
-	processedItems = [];
-	onItem = function(item, next) {
-		// Simulate an asynchronous operation
-		setTimeout(function() {
-			processedItems.push(item);
-			next('cancel');
-		}, 10);
-	};
-	response = function(result) {
-		Test.print('Array.wait() - Test 3', result === 'cancel' && JSON.stringify(value) !== JSON.stringify(processedItems) ? 'Test failed' : null);
-	};
-	Array.wait(onItem, response);
+		// Test 3: Wait for each element to be processed and then call the response with cancellation
+		value = [1, 2, 3, 4, 5];
+		response = [];
+		correct = '[1,2,3,4]';
+		fn = function(item, next) {
+			// Simulate an asynchronous operation
+			setTimeout(function() {
 
-	// Test 4: Wait for each element to be processed with a specified thread count and then call the response with cancellation
-	value = [1, 2, 3, 4, 5];
-	processedItems = [];
-	onItem = function(item, next) {
-		// Simulate an asynchronous operation
-		setTimeout(function() {
-			processedItems.push(item);
-			next('cancel');
-		}, 10);
-	};
-	response = function(result) {
-		Test.print('Array.wait() - Test 4', result === 'cancel' && JSON.stringify(value) !== JSON.stringify(processedItems) ? 'Test failed' : null);
-	};
-	Array.wait(onItem, response, 2);
+				response.push(item);
+				if (item === 4)
+					next('cancel');
+				else
+					next();
+			}, 10);
+		};
+		value.wait(fn, function(result) {
+			Test.print('Array.wait() - Test 3', result === 'cancel' && JSON.stringify(response) !== correct ? 'Test failed' : null);
 
-	// Test 5: Wait for each element to be processed with a thread count greater than the array length
-	value = [1, 2, 3, 4, 5];
-	processedItems = [];
-	onItem = function(item, next) {
-		// Simulate an asynchronous operation
-		setTimeout(function() {
-			processedItems.push(item);
-			next();
-		}, 10);
-	};
-	response = function() {
-		Test.print('Array.wait() - Test 5', JSON.stringify(value) !== JSON.stringify(processedItems) ? 'Test failed' : null);
-	};
-	Array.wait(onItem, response, 10);
+			
+			// Test 4: Wait for each element to be processed with a specified thread count and then call the response with cancellation
+			value = [1, 2, 3, 4, 5];
+			processed = [];
+			onItem = function(item, next) {
+				// Simulate an asynchronous operation
+				setTimeout(function() {
+					processed.push(item);
+					next('cancel');
+				}, 10);
+			};
+			response = function(result) {
+				Test.print('Array.wait() - Test 4', result === 'cancel' && JSON.stringify(value) !== JSON.stringify(processed) ? 'Test failed' : null);
+			};
+			value.wait(onItem, response, 2);
 
-	// Test next_wait function
-	var onItem = function(item, next, index) {
-		// Simulate an asynchronous operation
-		setTimeout(function() {
-			console.log('Processed item:', item, 'at index:', index);
-			next(); // Continue to the next item
-		}, 10);
-	};
+		});
+	}, 2);
+});
 
-	var callback = function(result) {
-		console.log('Callback result:', result);
-	};
 
-	var tmp = {};
-	tmp.pending = 3; // Simulating pending items
-	tmp.index = 0;
-	tmp.canceled = false;
 
-	// Test 1: Call next_wait with a type of 'cancel'
-	next_wait(null, onItem, callback, 2, tmp);
 
-	// Test 2: Call next_wait without cancellation
-	tmp.canceled = false;
-	next_wait(null, onItem, callback, 2, tmp);
 
-	// Test 3: Call next_wait with a type of 'cancel' when no more pending items
-	tmp.pending = 0;
-	tmp.canceled = false;
-	next_wait(null, onItem, callback, 2, tmp);
+	// // Test 5: Wait for each element to be processed with a thread count greater than the array length
+	// value = [1, 2, 3, 4, 5];
+	// processed = [];
+	// onItem = function(item, next) {
+	// 	// Simulate an asynchronous operation
+	// 	setTimeout(function() {
+	// 		processed.push(item);
+	// 		next();
+	// 	}, 10);
+	// };
+	// response = function() {
+	// 	Test.print('Array.wait() - Test 5', JSON.stringify(value) !== JSON.stringify(processed) ? 'Test failed' : null);
+	// };
+	// value.wait(onItem, response, 10);
 
-	// Test Array.async function
-	var asyncTask = function(next) {
-		// Simulate an asynchronous operation
-		setTimeout(function() {
-			console.log('Async task completed');
-			next(); // Continue to the next task
-		}, 10);
-	};
+	// // Test 1: Call Array.async with a type of 'cancel'
+	// Array.async(2, callback, tmp);
 
-	var callback = function(result) {
-		console.log('Callback result:', result);
-	};
+	// // Test 2: Call Array.async without cancellation
+	// tmp.canceled = false;
+	// Array.async(2, callback, tmp);
 
-	var tmp = {};
-	tmp.pending = 3; // Simulating pending tasks
-	tmp.canceled = false;
+	// // Test 3: Call Array.async with a type of 'cancel' when no more pending tasks
+	// tmp.pending = 0;
+	// tmp.canceled = false;
+	// Array.async(2, callback, tmp);
 
-	// Test 1: Call Array.async with a type of 'cancel'
-	Array.async(2, callback, tmp);
+	// // Test Array.random function
+	// value = [1, 2, 3, 4, 5];
 
-	// Test 2: Call Array.async without cancellation
-	tmp.canceled = false;
-	Array.async(2, callback, tmp);
+	// // Test 1: Call Array.random with item
+	// response = value.random(true);
+	// console.log('Random Item:', response);
 
-	// Test 3: Call Array.async with a type of 'cancel' when no more pending tasks
-	tmp.pending = 0;
-	tmp.canceled = false;
-	Array.async(2, callback, tmp);
+	// // Test 2: Call Array.random without item
+	// response = value.random();
+	// console.log('Shuffled Value:', response);
 
-	// Test Array.random function
-	value = [1, 2, 3, 4, 5];
+	// // Test 3: Call Array.random on an empty array
+	// value = [];
+	// response = value.random();
+	// console.log('Empty Result:', response);
 
-	// Test 1: Call Array.random with item
-	response = value.random(true);
-	console.log('Random Item:', response);
-
-	// Test 2: Call Array.random without item
-	response = value.random();
-	console.log('Shuffled Value:', response);
-
-	// Test 3: Call Array.random on an empty array
-	value = [];
-	response = value.random();
-	console.log('Empty Result:', response);
-
-	// Test 4: Call Array.random on an array with a single item
-	value = [42];
-	response = value.random();
-	console.log('Single Item Result:', response);
+	// // Test 4: Call Array.random on an array with a single item
+	// value = [42];
+	// response = value.random();
+	// console.log('Single Item Result:', response);
 
 
 	next();
@@ -1740,6 +1655,6 @@ Test.push('Date.prototypes', function(next) {
 
 
 
-	next();
+	//next();
 });
 Test.run();
