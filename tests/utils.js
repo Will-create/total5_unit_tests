@@ -4,7 +4,7 @@ require('../total5/index');
 require('../total5/test');
 var Exec = require('child_process').exec;
 Test.push('String.prototypes', function(next) {
-	var value, response, correct; // input, outpt, expected
+	var value, response, correct; // input, outpt, correct
 
 	value = 'peter sirka';
 	correct = 'Peter Sirka';
@@ -1408,250 +1408,275 @@ Test.push('Array.prototypes', function(next) {
 		Test.print('Array.wait() - Test 1', JSON.stringify(response) !== correct ? 'Test failed' : null);
 
 
-	// Test 2: Wait for each element to be processed with a specified thread count, then call the response
-	value = [1, 2, 3, 4, 5];
-	response = [];
-	correct = '[1,2,3,4,5]';
-	fn = function(item, next) {
-		// Simulate an asynchronous operation
-		setTimeout(function() {
-			response.push(item);
-			next();
-		}, 10);
-	};
-	value.wait(fn, function() {
-		console.log(JSON.stringify(response));
-		Test.print('Array.wait() - Test 2', JSON.stringify(response) !== correct ? 'Test failed' : null);
-
-		// Test 3: Wait for each element to be processed and then call the response with cancellation
+		// Test 2: Wait for each element to be processed with a specified thread count, then call the response
 		value = [1, 2, 3, 4, 5];
 		response = [];
-		correct = '[1,2,3,4]';
+		correct = '[1,2,3,4,5]';
 		fn = function(item, next) {
 			// Simulate an asynchronous operation
 			setTimeout(function() {
-
 				response.push(item);
-				if (item === 4)
-					next('cancel');
-				else
-					next();
+				next();
 			}, 10);
 		};
-		value.wait(fn, function(result) {
-			Test.print('Array.wait() - Test 3', result === 'cancel' && JSON.stringify(response) !== correct ? 'Test failed' : null);
+		value.wait(fn, function() {
+			Test.print('Array.wait() - Test 2', JSON.stringify(response) !== correct ? 'Test failed' : null);
 
-			
-			// Test 4: Wait for each element to be processed with a specified thread count and then call the response with cancellation
+			// Test 3: Wait for each element to be processed and then call the response with cancellation
 			value = [1, 2, 3, 4, 5];
-			processed = [];
-			onItem = function(item, next) {
+			response = [];
+			correct = '[1,2,3,4]';
+			fn = function(item, next) {
 				// Simulate an asynchronous operation
 				setTimeout(function() {
-					processed.push(item);
-					next('cancel');
+
+					response.push(item);
+					if (item === 4)
+						next('cancel');
+					else
+						next();
 				}, 10);
 			};
-			response = function(result) {
-				Test.print('Array.wait() - Test 4', result === 'cancel' && JSON.stringify(value) !== JSON.stringify(processed) ? 'Test failed' : null);
-			};
-			value.wait(onItem, response, 2);
+			value.wait(fn, function(result) {
+					Test.print('Array.wait() - Test 3', result === 'cancel' && JSON.stringify(response) !== correct ? 'Test failed' : null);
 
-		});
+
+				// Test 4: Wait for each element to be processed with a specified thread count and then call the response with cancellation
+					value = [1, 2, 3, 4, 5];
+					response = [];
+					correct = '[1,2,3,4,5]';
+					fn = function(item, next) {
+						// Simulate an asynchronous operation
+						setTimeout(function() {
+							response.push(item);
+							if (item === 4)
+								next('cancel');
+							else
+								next()
+						}, 10);
+					};
+
+					value.wait(fn, function(result) {
+						Test.print('Array.wait() - Test 4', result === 'cancel' && JSON.stringify(response) !== correct ? 'Test failed' : null);
+
+
+							// Test 5: Wait for each element to be processed with a thread count greater than the array length
+						value = [1, 2, 3, 4, 5];
+						response = [];
+						correct = '[1,2,3,4,5]';
+						fn = function(item, next) {
+							// Simulate an asynchronous operation
+							setTimeout(function() {
+								response.push(item);
+								next();
+							}, 10);
+						};
+						value.wait(fn, function() {
+								Test.print('Array.wait() - Test 5', JSON.stringify(response) !== correct ? 'Test failed' : null);
+						}, 10);
+				}, 2);
+
+			});
 	}, 2);
 });
 
 
 
 
+	// Test 1: Call Array.async without cancellation
+	value = [];
+	value.push(function(next) {
+		console.log('1');
+		next();
+	});
 
-	// // Test 5: Wait for each element to be processed with a thread count greater than the array length
-	// value = [1, 2, 3, 4, 5];
-	// processed = [];
-	// onItem = function(item, next) {
-	// 	// Simulate an asynchronous operation
-	// 	setTimeout(function() {
-	// 		processed.push(item);
-	// 		next();
-	// 	}, 10);
-	// };
-	// response = function() {
-	// 	Test.print('Array.wait() - Test 5', JSON.stringify(value) !== JSON.stringify(processed) ? 'Test failed' : null);
-	// };
-	// value.wait(onItem, response, 10);
+	value.push(function(next) {
+		console.log('2');
+		next();
+	});
 
-	// // Test 1: Call Array.async with a type of 'cancel'
-	// Array.async(2, callback, tmp);
+	value.push(function(next) {
+		console.log('3');
+		next();
+	});
 
-	// // Test 2: Call Array.async without cancellation
-	// tmp.canceled = false;
-	// Array.async(2, callback, tmp);
-
-	// // Test 3: Call Array.async with a type of 'cancel' when no more pending tasks
-	// tmp.pending = 0;
-	// tmp.canceled = false;
-	// Array.async(2, callback, tmp);
-
-	// // Test Array.random function
-	// value = [1, 2, 3, 4, 5];
-
-	// // Test 1: Call Array.random with item
-	// response = value.random(true);
-	// console.log('Random Item:', response);
-
-	// // Test 2: Call Array.random without item
-	// response = value.random();
-	// console.log('Shuffled Value:', response);
-
-	// // Test 3: Call Array.random on an empty array
-	// value = [];
-	// response = value.random();
-	// console.log('Empty Result:', response);
-
-	// // Test 4: Call Array.random on an array with a single item
-	// value = [42];
-	// response = value.random();
-	// console.log('Single Item Result:', response);
+	value.push(function(next) {
+		console.log('4');
+		next();
+	});
 
 
-	next();
+		value.async(1, function() {
+
+			setTimeout(function() {
+									// Test Array.random function
+				value = [1, 2, 3, 4, 5];
+
+				// Test 1: Call Array.random with item
+				response = value.random(true);
+				console.log('Random Item:', response);
+
+				// Test 2: Call Array.random without item
+				response = value.random();
+				console.log('Shuffled Value:', response);
+
+				// Test 3: Call Array.random on an empty array
+				value = [];
+				response = value.random();
+				console.log('Empty Result:', response);
+
+				// Test 4: Call Array.random on an array with a single item
+				value = [42];
+				response = value.random();
+				console.log('Single Item Result:', response);
+				next();
+
+			}, 1000);
+	});
+
+	
 });
 
 Test.push('Date.prototypes', function(next) {
+
+	
 	// Test 1: Set the time zone to 'America/New_York'
+	var value1 = value = new Date();
 	var timezone = 'America/New_York';
-	response = originalDate.setTimeZone(timezone);
-	var expected = new Date('2023-01-01T07:00:00'); // Expected result for 'America/New_York'
-	Test.print('Test 1', response.toString() === expected.toString());
+	correct = value.add('-5 hours'); // correct result for 'America/New_York'
+	response = value1.setTimeZone(timezone);
+	console.log(correct, response);
+	var format = 'HH:mm:ss';
+	Test.print('Test 1', response.format(format) !== correct.format(format) ? 'Failed to Test Set Timezone' :  null);
 
 	// Test 2: Set the time zone to 'Europe/London'
 	timezone = 'Europe/London';
-	response = originalDate.setTimeZone(timezone);
-	expected = new Date('2023-01-01T12:00:00'); // Expected result for 'Europe/London'
-	Test.print('Test 2', response.toString() === expected.toString());
+	response = value.setTimeZone(timezone);
+	correct = new Date('2023-01-01T12:00:00'); // correct result for 'Europe/London'
+	Test.print('Test  2', response.toString() === correct.toString() ? 'Failed to Test Set Timezone' :  null);
 
 	// Test 1: Difference in seconds
 	var date = new Date('2023-01-01T12:00:00');
-	response = originalDate.diff(date, 'seconds');
-	var expected = 3600; // 1 hour difference in seconds
-	Test.print('Test 1', response === expected);
+	response = value.diff(date, 'seconds');
+	var correct = 3600; // 1 hour difference in seconds
+	Test.print('Test 1', response === correct ? 'Failed to Test difference in seconds' :  null);
 
 	// Test 2: Difference in minutes
 	date = new Date('2023-01-01T11:30:00');
-	response = originalDate.diff(date, 'minutes');
-	expected = 30; // 30 minutes difference
-	Test.print('Test 2', response === expected);
+	response = value.diff(date, 'minutes');
+	correct = 30; // 30 minutes difference
+	Test.print('Test 2', response === correct ? 'Failed to Test difference in minutes' :  null);
 
 	// Test 3: Difference in hours
 	date = new Date('2023-01-01T06:00:00');
-	response = originalDate.diff(date, 'hours');
-	expected = 6; // 6 hours difference
-	Test.print('Test 3', response === expected);
+	response = value.diff(date, 'hours');
+	correct = 6; // 6 hours difference
+	Test.print('Test 3', response === correct ? 'Failed to Test difference in hours' :  null);
 
 	// Test 4: Difference in days
 	date = new Date('2022-12-25T00:00:00');
-	response = originalDate.diff(date, 'days');
-	expected = 7; // 7 days difference
-	Test.print('Test 4', response === expected);
+	response = value.diff(date, 'days');
+	correct = 7; // 7 days difference
+	Test.print('Test 4', response === correct ? 'Failed to Test difference in days' :  null);
 
 	// Test 5: Difference in months
 	date = new Date('2022-11-01T00:00:00');
-	response = originalDate.diff(date, 'months');
-	expected = 2; // 2 months difference (assuming 28 days per month)
-	Test.print('Test 5', response === expected);
+	response = value.diff(date, 'months');
+	correct = 2; // 2 months difference (assuming 28 days per month)
+	Test.print('Test 5', response === correct ? 'Failed to Test difference in months' :  null);
 
 	// Test 6: Difference in years
 	date = new Date('2020-01-01T00:00:00');
-	response = originalDate.diff(date, 'years');
-	expected = 2; // 2 years difference (assuming 28 days per month)
-	Test.print('Test 6', response === expected);
+	response = value.diff(date, 'years');
+	correct = 2; // 2 years difference (assuming 28 days per month)
+	Test.print('Test 6', response === correct ? 'Failed to Test difference in years' :  null);
 
 	// Test 1: Add 1 second
-	var originalDate = new Date('2023-01-01T12:00:00');
-	response = originalDate.add('second', 1);
-	var expected = new Date('2023-01-01T12:00:01');
-	Test.print('Test 1', response.getTime() === expected.getTime());
+	var value = new Date('2023-01-01T12:00:00');
+	response = value.add('1 second');
+	var correct = new Date('2023-01-01T12:00:01');
+	Test.print('Test 1', response.getTime() === correct.getTime() ? 'Failed to Test adding seconds' :  null);
 
 	// Test 2: Add 30 minutes
-	response = originalDate.add('minutes', 30);
-	expected = new Date('2023-01-01T12:30:00');
-	Test.print('Test 2', response.getTime() === expected.getTime());
+	response = value.add('minutes', 30);
+	correct = new Date('2023-01-01T12:30:00');
+	Test.print('Test 2', response.getTime() === correct.getTime() ? 'Failed to Test adding minutes' :  null);
 
 	// Test 3: Add 3 hours
-	response = originalDate.add('hours', 3);
-	expected = new Date('2023-01-01T15:00:00');
-	Test.print('Test 3', response.getTime() === expected.getTime());
+	response = value.add('hours', 3);
+	correct = new Date('2023-01-01T15:00:00');
+	Test.print('Test 3', response.getTime() === correct.getTime() ? 'Failed to Test adding hours' :  null);
 
 	// Test 4: Add 2 days
-	response = originalDate.add('days', 2);
-	expected = new Date('2023-01-03T12:00:00');
-	Test.print('Test 4', response.getTime() === expected.getTime());
+	response = value.add('days', 2);
+	correct = new Date('2023-01-03T12:00:00');
+	Test.print('Test 4', response.getTime() === correct.getTime() ? 'Failed to Test adding days' :  null);
 
 	// Test 5: Add 1 week
-	response = originalDate.add('weeks', 1);
-	expected = new Date('2023-01-08T12:00:00');
-	Test.print('Test 5', response.getTime() === expected.getTime());
+	response = value.add('weeks', 1);
+	correct = new Date('2023-01-08T12:00:00');
+	Test.print('Test 5', response.getTime() === correct.getTime() ? 'Failed to Test adding weeks' :  null);
 
 	// Test 1: Extend date with string '2023-01-01'
-	var originalDate = new Date('2023-01-01T12:00:00');
-	response = originalDate.extend('2023-01-01');
-	var expected = new Date('2023-01-01T12:00:00');
-	Test.print('Date.extend() - Test 1', response.getTime() === expected.getTime());
+	var value = new Date('2023-01-01T12:00:00');
+	response = value.extend('2023-01-01');
+	var correct = new Date('2023-01-01T12:00:00');
+	Test.print('Date.extend() - Test 1', response.getTime() === correct.getTime() ? 'Failed to Test extending seconds' :  null);
 
 	// Test 2: Extend date with string '2023-02-15'
-	response = originalDate.extend('2023-02-15');
-	expected = new Date('2023-02-15T12:00:00');
-	Test.print('Date.extend() - Test 2', response.getTime() === expected.getTime());
+	response = value.extend('2023-02-15');
+	correct = new Date('2023-02-15T12:00:00');
+	Test.print('Date.extend() - Test 2', response.getTime() === correct.getTime());
 
 	// Test 3: Extend date with string '2023-03-10'
-	response = originalDate.extend('2023-03-10');
-	expected = new Date('2023-03-10T12:00:00');
-	Test.print('Date.extend() - Test 3', response3.getTime() === expected3.getTime());
+	response = value.extend('2023-03-10');
+	correct = new Date('2023-03-10T12:00:00');
+	Test.print('Date.extend() - Test 3', response3.getTime() === correct3.getTime());
 
 	// Test 1: Format date with default format
-	var originalDate = new Date('2023-01-15T08:30:45.123Z');
-	response = originalDate.format();
-	var expected = '2023-01-15T08:30:45.123Z';
-	Test.print('Date.format() - Test 1', response === expected);
+	var value = new Date('2023-01-15T08:30:45.123Z');
+	response = value.format();
+	var correct = '2023-01-15T08:30:45.123Z';
+	Test.print('Date.format() - Test 1', response === correct);
 
 	// Test 2: Format date with custom format 'yyyy/MM/dd HH:mm:ss'
-	response = originalDate.format('yyyy/MM/dd HH:mm:ss');
-	expected = '2023/01/15 08:30:45';
-	Test.print('Date.format() - Test 2', response === expected);
+	response = value.format('yyyy/MM/dd HH:mm:ss');
+	correct = '2023/01/15 08:30:45';
+	Test.print('Date.format() - Test 2', response === correct);
 
 	// Test 3: Format date with custom format 'dddd, MMMM D, YYYY h:mm A'
-	response = originalDate.format('dddd, MMMM D, YYYY h:mm A');
-	expected = 'Sunday, January 15, 2023 8:30 AM';
-	Test.print('Date.format() - Test 3', response === expected);
+	response = value.format('dddd, MMMM D, YYYY h:mm A');
+	correct = 'Sunday, January 15, 2023 8:30 AM';
+	Test.print('Date.format() - Test 3', response === correct);
 
 	// Test 1: Convert date to UTC (without ticks)
 	var originalDate = new Date('2023-01-15T08:30:45.123Z');
 	response = originalDate.toUTC();
-	var expected = new Date('2023-01-15T08:30:45.123Z');
-	Test.print('Date.toUTC() - Test 1', response.getTime() === expected.getTime());
+	var correct = new Date('2023-01-15T08:30:45.123Z');
+	Test.print('Date.toUTC() - Test 1', response.getTime() === correct.getTime());
 
 	// Test 2: Convert date to UTC with ticks
 	response = originalDate.toUTC(true);
-	expected = originalDate.getTime() + originalDate.getTimezoneOffset() * 60000;
-	Test.print('Date.toUTC() - Test 2', response === expected);
+	correct = originalDate.getTime() + originalDate.getTimezoneOffset() * 60000;
+	Test.print('Date.toUTC() - Test 2', response === correct);
 
 	// Test 3: Convert another date to UTC (without ticks)
 	var anotherDate = new Date('2023-02-28T12:45:30.500Z');
 	response = anotherDate.toUTC();
-	expected = new Date('2023-02-28T12:45:30.500Z');
-	Test.print('Date.toUTC() - Test 3', response.getTime() === expected.getTime());
+	correct = new Date('2023-02-28T12:45:30.500Z');
+	Test.print('Date.toUTC() - Test 3', response.getTime() === correct.getTime());
 
 	// Test 1: Parsing date with Date.parseDate
 	var originalDate = new Date('2023-01-15T08:30:45.123Z');
 	response = originalDate.parseDate();
-	var expected = originalDate; // The expected result is the same date object
-	Test.print('Date.parseDate() - Test 1', response === expected);
+	var correct = originalDate; // The correct result is the same date object
+	Test.print('Date.parseDate() - Test 1', response === correct);
 
 	// Test 2: Parsing another date with Date.parseDate
 	var anotherDate = new Date('2023-02-28T12:45:30.500Z');
 	response = anotherDate.parseDate();
-	expected = anotherDate; // The expected result is the same date object
-	Test.print('Date.parseDate() - Test 2', response === expected);
+	correct = anotherDate; // The correct result is the same date object
+	Test.print('Date.parseDate() - Test 2', response === correct);
 
 
 
