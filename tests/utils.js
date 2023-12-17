@@ -1593,90 +1593,93 @@ Test.push('Date.prototypes', function(next) {
 
 	// Test 1: Add 1 second
 	var value = new Date('2023-01-01T12:00:00');
-	response = value.add('1 second');
+	response = value.add('seconds', 1);
 	var correct = new Date('2023-01-01T12:00:01');
-	Test.print('Test 1', response.getTime() === correct.getTime() ? 'Failed to Test adding seconds' :  null);
+	Test.print('Test 1', response.format(format) !== correct.format(format) ? 'Failed to Test adding seconds' :  null);
 
 	// Test 2: Add 30 minutes
 	response = value.add('minutes', 30);
 	correct = new Date('2023-01-01T12:30:00');
-	Test.print('Test 2', response.getTime() === correct.getTime() ? 'Failed to Test adding minutes' :  null);
+	Test.print('Test 2', response.format(format) !== correct.format(format) ? 'Failed to Test adding minutes' :  null);
 
 	// Test 3: Add 3 hours
 	response = value.add('hours', 3);
 	correct = new Date('2023-01-01T15:00:00');
-	Test.print('Test 3', response.getTime() === correct.getTime() ? 'Failed to Test adding hours' :  null);
+	Test.print('Test 3', response.format(format) !== correct.format(format) ? 'Failed to Test adding hours' :  null);
 
 	// Test 4: Add 2 days
 	response = value.add('days', 2);
 	correct = new Date('2023-01-03T12:00:00');
-	Test.print('Test 4', response.getTime() === correct.getTime() ? 'Failed to Test adding days' :  null);
+	Test.print('Test 4', response.format(format) !== correct.format(format) ? 'Failed to Test adding days' :  null);
 
 	// Test 5: Add 1 week
 	response = value.add('weeks', 1);
 	correct = new Date('2023-01-08T12:00:00');
-	Test.print('Test 5', response.getTime() === correct.getTime() ? 'Failed to Test adding weeks' :  null);
+	Test.print('Test 5', response.format(format) !== correct.format(format) ? 'Failed to Test adding weeks' :  null);
 
 	// Test 1: Extend date with string '2023-01-01'
 	var value = new Date('2023-01-01T12:00:00');
-	response = value.extend('2023-01-01');
-	var correct = new Date('2023-01-01T12:00:00');
-	Test.print('Date.extend() - Test 1', response.getTime() === correct.getTime() ? 'Failed to Test extending seconds' :  null);
+	response = value.extend('2024-01-01');
+	var correct = new Date('2024-01-01T12:00:00');
+	
+	Test.print('Date.extend() - Test 1', response.format(format) !== correct.format(format) ? 'Failed to Test extending' :  null);
 
 	// Test 2: Extend date with string '2023-02-15'
 	response = value.extend('2023-02-15');
 	correct = new Date('2023-02-15T12:00:00');
-	Test.print('Date.extend() - Test 2', response.getTime() === correct.getTime());
+	Test.print('Date.extend() - Test 2', response.format(format) !== correct.format(format) ? 'Failed to Test extending' :  null);
 
 	// Test 3: Extend date with string '2023-03-10'
 	response = value.extend('2023-03-10');
 	correct = new Date('2023-03-10T12:00:00');
-	Test.print('Date.extend() - Test 3', response3.getTime() === correct3.getTime());
+	Test.print('Date.extend() - Test 3', response.format(format) !== correct.format(format) ? 'Failed to Test extending' :  null);
 
 	// Test 1: Format date with default format
-	var value = new Date('2023-01-15T08:30:45.123Z');
+	value = new Date('2023-01-15T08:30:45.123Z');
 	response = value.format();
-	var correct = '2023-01-15T08:30:45.123Z';
-	Test.print('Date.format() - Test 1', response === correct);
+	correct = '2023-01-15T08:30:45.123Z';
+	console.log(value, response, correct);
+	Test.print('Date.format() - Test 1', response !== correct ? 'Failed to test Date format with default' : null);
 
 	// Test 2: Format date with custom format 'yyyy/MM/dd HH:mm:ss'
 	response = value.format('yyyy/MM/dd HH:mm:ss');
 	correct = '2023/01/15 08:30:45';
-	Test.print('Date.format() - Test 2', response === correct);
+	Test.print('Date.format() - Test 2', response !== correct ? 'Failed to test Date format yyyy/MM/dd HH:mm:ss' : null);
 
 	// Test 3: Format date with custom format 'dddd, MMMM D, YYYY h:mm A'
-	response = value.format('dddd, MMMM D, YYYY h:mm A');
+	response = value.format('dddd, MMMM D, YYYY H:mm a');
 	correct = 'Sunday, January 15, 2023 8:30 AM';
-	Test.print('Date.format() - Test 3', response === correct);
+	console.log(response);
+	Test.print('Date.format() - Test 3', response !== correct ? 'Failed to test Date format dddd, MMMM D, YYYY h:mm A' : null);
 
 	// Test 1: Convert date to UTC (without ticks)
-	var originalDate = new Date('2023-01-15T08:30:45.123Z');
-	response = originalDate.toUTC();
+	var value = new Date('2023-01-15T08:30:45.123Z');
+	response = value.toUTC();
 	var correct = new Date('2023-01-15T08:30:45.123Z');
-	Test.print('Date.toUTC() - Test 1', response.getTime() === correct.getTime());
+	Test.print('Date.toUTC() - Test 1', response.getTime() !== correct.getTime() ? 'Failed to test converting Date to UTC without ticks' : null);
 
 	// Test 2: Convert date to UTC with ticks
-	response = originalDate.toUTC(true);
-	correct = originalDate.getTime() + originalDate.getTimezoneOffset() * 60000;
-	Test.print('Date.toUTC() - Test 2', response === correct);
+	response = value.toUTC(true);
+	correct = value.getTime() + value.getTimezoneOffset() * 60000;
+	Test.print('Date.toUTC() - Test 2', response !== correct ? 'Failed to test converting Date' : null);
 
 	// Test 3: Convert another date to UTC (without ticks)
-	var anotherDate = new Date('2023-02-28T12:45:30.500Z');
-	response = anotherDate.toUTC();
+	var value = new Date('2023-02-28T12:45:30.500Z');
+	response = value.toUTC();
 	correct = new Date('2023-02-28T12:45:30.500Z');
-	Test.print('Date.toUTC() - Test 3', response.getTime() === correct.getTime());
+	Test.print('Date.toUTC() - Test 3', response.getTime() !== correct.getTime() ? 'Failed to test converting Date' : null);
 
 	// Test 1: Parsing date with Date.parseDate
-	var originalDate = new Date('2023-01-15T08:30:45.123Z');
-	response = originalDate.parseDate();
-	var correct = originalDate; // The correct result is the same date object
-	Test.print('Date.parseDate() - Test 1', response === correct);
+	var value = new Date('2023-01-15T08:30:45.123Z');
+	response = value.parseDate();
+	var correct = value; // The correct result is the same date object
+	Test.print('Date.parseDate() - Test 1', response !== correct ? 'Failted to test convertin Date' : null);
 
 	// Test 2: Parsing another date with Date.parseDate
-	var anotherDate = new Date('2023-02-28T12:45:30.500Z');
-	response = anotherDate.parseDate();
-	correct = anotherDate; // The correct result is the same date object
-	Test.print('Date.parseDate() - Test 2', response === correct);
+	var value = new Date('2023-02-28T12:45:30.500Z');
+	response = value.parseDate();
+	correct = value; // The correct result is the same date object
+	Test.print('Date.parseDate() - Test 2', response !== correct ? 'Failted to test convertin Date' : null);
 
 
 
