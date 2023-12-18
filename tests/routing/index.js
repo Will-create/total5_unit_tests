@@ -84,11 +84,31 @@ ON('ready', function() {
 
 
 	Test.push('RESTBuilder', function(next) {
+
+		var arr = [];
+
 		// HTML Page
-		RESTBuilder.GET('https://www.totaljs.com').exec(function(err, response) {
-			Test.print('HTML Page', (err !== null) && (response !== EMPTYOBJECT) ? 'HTML Page loading failed' : null);
-			next();
+		arr.push(function(next_fn) {
+			RESTBuilder.GET('https://www.totaljs.com').exec(function(err, response) {
+				Test.print('HTML Page', (err !== null) && (response !== EMPTYOBJECT) ? 'HTML Page loading failed' : null);
+				next_fn();
+			});
 		});
+
+		// Invalid path
+		arr.push(function(next_fn) {
+			RESTBuilder.GET('https://www.totaljs.com/helfo').exec(function(err) {
+				Test.print('Invalid path - Test 1', err instanceof ErrorBuilder ? null : 'Expected Error Builder instance');
+				next_fn();
+			});
+		});
+
+		arr.sync(function() {
+			next();
+		})
+
+		
+		
 	});
 
 	setTimeout(function() {
